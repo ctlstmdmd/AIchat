@@ -18,11 +18,25 @@ export type MemoryItem = {
   tag: string;
 };
 
+export type CharacterAssets = {
+  avatar: {
+    chibi: string;
+    fallback?: string;
+  };
+  featureArt: {
+    channel: string;
+    channelFallback?: string;
+    diary: string;
+    zone: string;
+  };
+};
+
 export type Character = {
   id: string;
   name: string;
   handle: string;
-  avatar: string;
+  /** Legacy imports may omit assets; the workspace loader hydrates them from the character definition. */
+  assets?: CharacterAssets;
   status: "online" | "away" | "offline";
   signature: string;
   since: string;
@@ -69,7 +83,18 @@ export const demoCharacters: Character[] = [
     id: "jiang",
     name: "基昂",
     handle: "Jiang_27",
-    avatar: "/assets/jiang-avatar.png",
+    assets: {
+      avatar: {
+        chibi: "/characters/char/avatar/chibi/default.webp",
+        fallback: "/characters/char/feature-art/diary.webp",
+      },
+      featureArt: {
+        channel: "/characters/char/feature-art/channel.webp",
+        channelFallback: "/characters/char/feature-art/zone.webp",
+        diary: "/characters/char/feature-art/diary.webp",
+        zone: "/characters/char/feature-art/zone.webp",
+      },
+    },
     status: "online",
     signature: "晚一点没关系，我一直在。",
     since: "2024.09.18",
@@ -81,8 +106,8 @@ export const demoCharacters: Character[] = [
       { id: "memory-4", date: "2026.05.20", title: "第 1000 条消息", summary: "没有隆重庆祝，只是把那句“今天也辛苦了”悄悄置顶。", tag: "里程碑" },
     ],
   },
-  { id: "xiaoman", name: "小满", handle: "summer_m", avatar: "", status: "away", signature: "在路上。", since: "2025.03.02", location: "上海", memories: [] },
-  { id: "late-night", name: "深夜观察组", handle: "night_watch", avatar: "", status: "online", signature: "夜猫子集合。", since: "2025.10.11", location: "线上", memories: [] },
+  { id: "xiaoman", name: "小满", handle: "summer_m", status: "away", signature: "在路上。", since: "2025.03.02", location: "上海", memories: [] },
+  { id: "late-night", name: "深夜观察组", handle: "night_watch", status: "online", signature: "夜猫子集合。", since: "2025.10.11", location: "线上", memories: [] },
 ];
 
 export const demoConversations: Conversation[] = [

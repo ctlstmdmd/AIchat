@@ -92,7 +92,10 @@ export async function loadWorkspace() {
   return {
     events: events.map(validateEvent).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     conversations: conversations.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
-    characters,
+    characters: characters.map((character) => ({
+      ...character,
+      assets: character.assets ?? demoCharacters.find((item) => item.id === character.id)?.assets,
+    })),
     settings: settings ?? defaultSettings,
     profile: profile ?? defaultProfile,
     zonePosts: zonePosts ?? demoZonePosts,

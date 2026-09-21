@@ -112,3 +112,18 @@
 - [ ] Start `npm run dev` on port 3001 and inspect `/`, `/messages`, `/settings`, `/profile`, `/memories`, and `/zone`.
 - [ ] Inspect approximately 1440px/1600px and 390px viewports for layout quality and horizontal overflow.
 - [ ] Re-read the user requirements and report any remaining gaps explicitly.
+
+### Task 7: Warm visual integration
+
+**Files:**
+- Modify: `app/globals.css`
+- Modify: `stores/demoData.ts`
+- Modify: `components/qq/QQShell.tsx`
+- Replace: `design-system/qq-companion/MASTER.md`
+- Create: `public/characters/char/avatar/`, `public/characters/char/chibi/`, `public/characters/char/feature-art/`
+
+- [ ] Replace the deprecated blue/corporate palette with cream, butter-yellow, warm glass, and restrained decorative accents.
+- [ ] Extend the existing Character type with one centralized asset map and migrate React image references to it.
+- [ ] Keep the same character identity across original avatar, chibi art, and feature illustrations.
+- [ ] Make Messages, Chat, Zone, Profile, and Memories screenshot-ready before secondary pages.
+- [ ] Preserve readable contrast, restrained blur, responsive list/detail navigation, and no horizontal overflow.
