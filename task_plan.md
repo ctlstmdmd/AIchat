@@ -12,13 +12,14 @@
 | `apply_patch` rejected delete+add for the same file in one patch | 1 | Root cause: patch grammar forbids multiple operations on one target; use separate delete and add patches. |
 | PowerShell truncated a double-quoted `rg` alternation | 1 | Root cause: PowerShell does not use backslash to escape nested quotes; rerun with a single-quoted pattern. |
 | ESLint treated `useDemo` as a React Hook | 1 | Root cause: event handler used the reserved `use*` hook naming convention; renamed it to `setDemoMode` without changing behavior. |
-| Approved `default.webp` / `channel.webp` failed image decoding | 1 | Their file headers are not RIFF/WebP while Zone/Diary are valid; inspect the approved source repository without generating replacements. |
+| Initial `default.webp` / `channel.webp` imports failed image decoding | 1 | Diagnosed the invalid bytes without generating replacements; upstream repair commit `91a8670` later supplied valid approved RIFF/WebP files. |
 | PowerShell `Get-Content -Encoding Byte` failed on PowerShell Core | 1 | Root cause: `Byte` is not a supported Core encoding; read exact bytes with `System.IO.File.ReadAllBytes`. |
 | The stale local Next process returned 404 for the new routes | 1 | Verified its exact PID belonged to this workspace, stopped only that process, then restarted the current dev server on port 3001. |
 | Codex computer-use helper could not create its Windows kernel assets | 2 | Stopped retrying per the skill guidance and used an isolated local Edge/CDP runtime check instead. |
 | `Start-Process` with a remote-debugging Edge profile was blocked by execution policy | 1 | Replaced it with a temporary Node script using `child_process.spawn`, then removed the script after validation. |
 | Runtime check initially targeted a nonexistent `.conversation-item` selector | 1 | Inspected the rendered component and corrected the one-off check to the existing `.conversation` control. |
 | `/` returned 500 after running `next build` beside the dev server | 1 | The log showed a missing `.next` chunk caused by both processes writing the same cache; restarted dev and all routes returned 200. |
+| Phase 4 asset-status patch missed one exact historical phrase | 1 | Re-read the matching lines and applied a narrower documentation-only correction; no product file was affected. |
 
 ## Phase 2 — Portfolio Chat Experience
 
@@ -38,6 +39,16 @@
 - [x] D. Polish Zone, Profile, and Memories with the same character identity
 - [x] E. Polish Contacts, Settings, and Channels without changing their architecture
 - [x] F. Verify 1440–1600px desktop and 390px mobile behavior
+
+## Phase 4 — Portfolio Freeze
+
+- [x] A. Verify repaired default avatar and Channel artwork from binary and visual evidence
+- [x] B. Document canonical assets and defensive fallback behavior
+- [x] C. QA the five portfolio screenshot states at 1600px, 1440px, and 390px
+- [x] D. Remove only confirmed visual residue or screenshot-blocking defects
+- [x] E. Create a professional root `README.md`
+- [x] F. Run full functional, responsive, repository, and build validation
+- [x] G. Report Portfolio v0.1 readiness and stop before commit/push
 
 ### Phase 2 constraints
 

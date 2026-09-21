@@ -49,6 +49,19 @@ Examples:
 
 Do not mix module hero illustrations with navigation icons.
 
+## Character asset integrity
+
+The approved character identity remains the blond, curly-haired chibi used by the imported set. Character paths are centralized in `stores/demoData.ts`; components must not substitute `public/assets/jiang-avatar.png` or hardcode a second identity.
+
+| Canonical asset | Integrity | Active behavior |
+| --- | --- | --- |
+| `public/characters/char/avatar/chibi/default.webp` | Valid RIFF/WebP, repaired in `91a8670` | Normal avatar for Messages and Profile |
+| `public/characters/char/feature-art/channel.webp` | Valid RIFF/WebP, repaired in `91a8670` | Dedicated Channel feature artwork |
+| `public/characters/char/feature-art/diary.webp` | Valid RIFF/WebP | Memories art and defensive avatar fallback |
+| `public/characters/char/feature-art/zone.webp` | Valid RIFF/WebP | Zone art and defensive Channel fallback |
+
+Both repaired files decode directly and preserve the approved character identity. `CharacterImage` keeps the Diary/Zone fallback paths only for defensive recovery if a future asset request fails; normal rendering no longer uses those fallbacks.
+
 ## CSS-only components
 
 Do **not** save the following as raster images:

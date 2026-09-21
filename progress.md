@@ -23,7 +23,22 @@
 - Fast-forwarded `origin/main` from `dc09d39` to approved asset commit `ea95102` without conflicts or loss of local work.
 - Replaced the blue Foundation stylesheet with a shared warm cream/yellow/frosted-glass token system covering desktop and mobile states.
 - Integrated approved navigation/action icons and valid Diary/Zone character art across Messages, Profile, Memories, Zone, Channels, and Settings.
-- Added safe approved fallbacks for the two malformed upstream WebP files without generating or substituting a new character identity.
+- Added approved Diary/Zone fallbacks for the initially malformed WebP imports without generating or substituting a new character identity; repair commit `91a8670` later restored both primary files.
 - Verified an isolated browser session can seed Demo Mode, submit a text event, receive a character event, create poke/transfer/call events, reload them from IndexedDB, and render the chat at 1600px and 390px without horizontal overflow.
 - Confirmed all product routes return HTTP 200 from the current port-3001 dev server.
 - Final validation passed: `npm run typecheck`, `npm run lint`, `npm run test`, and `npm run build`; the development server is running on port 3001 and all eight checked pages return 200.
+
+## 2026-09-22 — Phase 4 portfolio freeze
+
+- Started from clean commit `f3a2196` with no unexpected local changes.
+- Created the scoped Phase 4 implementation plan and completed binary signature/hash diagnostics for all approved character WebPs.
+- Captured and inspected the five portfolio states at 1600px and 1440px plus core/mobile states at 390px in an isolated Edge profile.
+- Applied one evidence-backed Zone hero CSS correction and rechecked it at all three target widths.
+- Added a professional root README and documented character asset integrity plus approved fallback behavior in the asset manifest.
+- Re-ran isolated runtime checks for Demo chat, poke, transfer, call record, reload persistence, image fallbacks, and responsive overflow; removed the temporary checker afterward.
+- Final sequential validation passed: typecheck, lint, legacy parser test, and production build. The restarted port-3001 dev server returned HTTP 200 for all eight routes.
+- Repository safety checks found no tracked build output, environment files, temporary checkers, or API-key-shaped secrets; final work remains uncommitted as required.
+- Synced asset repair commit `91a8670` with `git pull --ff-only`; Git reported Already up to date because the commit was already present locally, and all uncommitted Phase 4 work remained intact.
+- Verified both repaired files have RIFF/WebP signatures and visually decode as the approved blond avatar and dedicated Channel illustration.
+- Captured and inspected fresh `/messages`, `/profile`, and `/channels` screenshots after the repair; all three show the repaired primary assets directly with no broken image or incorrect character identity.
+- Post-sync sequential validation passed: `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, and `git diff --check`. After restarting the port-3001 development server, `/messages`, `/zone`, `/profile`, `/memories`, and `/channels` all returned HTTP 200; both repaired WebP routes also returned HTTP 200 with their expected byte lengths.

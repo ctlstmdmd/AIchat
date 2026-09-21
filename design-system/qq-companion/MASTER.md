@@ -61,7 +61,7 @@ The Character model is the single source of truth through `character.assets`.
 - Diary/memory: `/characters/char/feature-art/diary.webp`
 - Channels: `/characters/char/feature-art/channel.webp`
 
-The imported avatar and Channel files currently fail WebP decoding in both this repository and the source repository. The UI therefore falls back only to other approved same-identity assets (`diary.webp` for avatar and `zone.webp` for Channel) until those two upstream files are replaced. `public/assets/jiang-avatar.png` is compatibility-only and must not be the displayed identity.
+The approved avatar and Channel files were repaired in commit `91a8670` and now decode directly as RIFF/WebP. `diary.webp` and `zone.webp` remain defensive fallbacks only. `public/assets/jiang-avatar.png` is compatibility-only and must not be the displayed identity.
 
 ## Approved UI assets
 
