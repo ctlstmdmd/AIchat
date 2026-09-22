@@ -5,7 +5,7 @@ export type IconName =
   | "search" | "phone" | "info" | "plus" | "send" | "back" | "more"
   | "image" | "smile" | "poke" | "wallet" | "clock" | "heart" | "comment"
   | "share" | "sparkle" | "memory" | "album" | "check" | "chevron" | "shield"
-  | "radio" | "pin" | "close" | "moon";
+  | "radio" | "pin" | "close" | "moon" | "microphone" | "volume" | "camera" | "camera-switch";
 
 export function Icon({ name, size = 20, ...props }: { name: IconName; size?: number } & SVGProps<SVGSVGElement>) {
   const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -44,4 +44,8 @@ const paths: Record<IconName, React.ReactNode> = {
   pin: <><path d="M14 4 20 10l-3 1-4 4 1 3-2 2-8-8 2-2 3 1 4-4Z"/><path d="m8 16-5 5"/></>,
   close: <path d="m6 6 12 12M18 6 6 18"/>,
   moon: <path d="M20 15.2A8.5 8.5 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z"/>,
+  microphone: <><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"/></>,
+  volume: <><path d="M5 9h4l5-4v14l-5-4H5Z"/><path d="M17 9a4 4 0 0 1 0 6M19.5 6.5a7.5 7.5 0 0 1 0 11"/></>,
+  camera: <><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3Z"/></>,
+  "camera-switch": <><path d="M5 8a8 8 0 0 1 13.5-1.5L21 9M19 16a8 8 0 0 1-13.5 1.5L3 15"/><path d="M21 4v5h-5M3 20v-5h5"/></>,
 };

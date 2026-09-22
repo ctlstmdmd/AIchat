@@ -20,6 +20,11 @@
 | Runtime check initially targeted a nonexistent `.conversation-item` selector | 1 | Inspected the rendered component and corrected the one-off check to the existing `.conversation` control. |
 | `/` returned 500 after running `next build` beside the dev server | 1 | The log showed a missing `.next` chunk caused by both processes writing the same cache; restarted dev and all routes returned 200. |
 | Phase 4 asset-status patch missed one exact historical phrase | 1 | Re-read the matching lines and applied a narrower documentation-only correction; no product file was affected. |
+| Edge baseline screenshot was reported missing immediately after launch | 2 | Investigation showed Edge detached and wrote the file shortly afterward; use a resolved absolute screenshot argument and poll for the output file instead of treating process return as capture completion. |
+| `Start-Process` screenshot orchestration was rejected by the host policy | 1 | No process started and no file changed; use the already proven direct Edge invocation followed by output-file polling. |
+| Inline CDP diagnostic blocked before the evaluator ran because Edge stayed in the foreground | 1 | Stopped that verified diagnostic process; launch Edge as its own managed exec session, then query the CDP endpoint from a separate command. |
+| Shell-launched Edge exited before exposing the requested CDP port | 1 | The browser's Windows single-instance behavior detached from the shell launch; use one inline Node process to own the isolated Edge child, poll its endpoint, evaluate metrics, then terminate only that child. |
+| Built-in background extraction produced a redrawn 1280px transfer character instead of a pixel-preserving cutout | 1 | Rejected the output and left it outside the workspace; inspect the approved source repository before choosing a deterministic extraction path. |
 
 ## Phase 2 — Portfolio Chat Experience
 
@@ -49,6 +54,31 @@
 - [x] E. Create a professional root `README.md`
 - [x] F. Run full functional, responsive, repository, and build validation
 - [x] G. Report Portfolio v0.1 readiness and stop before commit/push
+
+## Phase 5 — Scoped Channel Topic Cards
+
+- [x] A. Audit the existing Channels markup, shared tokens, and responsive grid
+- [x] B. Add semantic movie, music-memory, and daily-journal card structure
+- [x] C. Apply CSS-only visual differentiation without changing the hero
+- [x] D. Validate 1600px, 1440px, and 390px screenshots and run typecheck/lint/build
+
+## Phase 5 — Interaction Showcase
+
+- [x] A. Safely sync and verify the four approved interaction artworks
+- [x] B. Centralize interaction art paths in the Character asset model and legacy hydration
+- [x] C. Upgrade poke and transfer event cards without changing event schemas
+- [x] D. Add accessible voice/video demo dialogs and wire existing entry points
+- [x] E. Persist matching ended-call events and render both record types
+- [x] F. Update the asset manifest and portfolio README
+- [x] G. Validate event flow, persistence, screenshots, responsive overflow, and the full command suite
+
+## Phase 5 — Transparent Interaction Artwork Repair
+
+- [x] A. Trace the live interaction-art reference chain and scan for duplicate assets
+- [x] B. Measure alpha/opaque-black pixels for interaction and feature artwork
+- [x] C. Replace only confirmed black-background assets with identity-preserving transparent versions
+- [x] D. Refine sticker-like containment without changing chat or call behavior
+- [x] E. Verify direct asset responses, Messages/call screenshots, cache behavior, and validation commands
 
 ### Phase 2 constraints
 

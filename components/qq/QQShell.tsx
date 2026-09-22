@@ -17,6 +17,8 @@ import { Icon, type IconName } from "@/components/qq/Icon";
 
 type View = "messages" | "contacts" | "zone" | "channels" | "profile" | "memories" | "settings";
 type Workspace = Awaited<ReturnType<typeof loadWorkspace>>;
+type CallKind = "voice" | "video";
+type ActiveCall = { kind: CallKind; startedAt: number };
 
 const navItems: Array<{ id: View; label: string; icon: IconName; href: string; asset?: string }> = [
   { id: "messages", label: "消息", icon: "message", href: "/messages", asset: "/ui/icons/nav/message.svg" },
@@ -39,6 +41,7 @@ export function QQShell({ initialView = "messages" }: { initialView?: View }) {
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const [notice, setNotice] = useState<string>();
+  const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -134,18 +137,35 @@ export function QQShell({ initialView = "messages" }: { initialView?: View }) {
     await appendCharacterMessage(complete.trim(), conversation);
   }
 
-  async function addSpecialEvent(type: "interaction.poke" | "interaction.transfer" | "call.voice.end") {
+  async function addSpecialEvent(type: "interaction.poke" | "interaction.transfer") {
     if (!selectedConversation) return;
     const shared = { id: createEventId(), actorId: "user", targetId: selectedConversation.characterId, conversationId: selectedConversation.id, createdAt: new Date().toISOString(), source: "user" as const };
     const event: AppEvent = type === "interaction.poke"
       ? { ...shared, type, payload: { content: `你拍了拍${selectedCharacter.name}` } }
-      : type === "interaction.transfer"
-        ? { ...shared, type, payload: { amount: 52, currency: "CNY", note: "请你喝咖啡" } }
-        : { ...shared, type, payload: { content: "语音通话", durationSeconds: 128 } };
+      : { ...shared, type, payload: { amount: 52, currency: "CNY", note: "请你喝咖啡" } };
     await appendEvent(event);
-    await updateConversation(type === "interaction.poke" ? `[拍一拍] 你拍了拍${selectedCharacter.name}` : type === "interaction.transfer" ? "[转账] ¥52.00" : "[通话] 02:08", "user");
+    await updateConversation(type === "interaction.poke" ? `[拍一拍] 你拍了拍${selectedCharacter.name}` : "[转账] ¥52.00", "user");
     setActionMenu(false);
-    setNotice(type === "call.voice.end" ? "已添加一条演示通话记录" : undefined);
+  }
+
+  function startCall(kind: CallKind) {
+    setActionMenu(false);
+    setActiveCall({ kind, startedAt: Date.now() });
+  }
+
+  async function finishCall(kind: CallKind, durationSeconds: number) {
+    if (!selectedConversation) return;
+    const shared = {
+      id: createEventId(), actorId: "user", targetId: selectedConversation.characterId,
+      conversationId: selectedConversation.id, createdAt: new Date().toISOString(), source: "user" as const,
+    };
+    const event: AppEvent = kind === "voice"
+      ? { ...shared, type: "call.voice.end", payload: { content: "语音通话", durationSeconds } }
+      : { ...shared, type: "call.video.end", payload: { content: "视频通话", durationSeconds } };
+    await appendEvent(event);
+    await updateConversation(`[通话] ${kind === "voice" ? "语音" : "视频"} · ${formatDuration(durationSeconds)}`, "user");
+    setActiveCall(null);
+    setNotice(`已保存${kind === "voice" ? "语音" : "视频"}通话记录`);
   }
 
   async function updateSettings(next: AppSettings, nextProfile?: AIProfile) {
@@ -161,9 +181,9 @@ export function QQShell({ initialView = "messages" }: { initialView?: View }) {
       : <SectionPane view={initialView} character={character} />}
     <main className="main">
       {initialView === "messages" && selectedConversation
-        ? <ChatView conversation={selectedConversation} character={selectedCharacter} events={visibleEvents} draft={draft} setDraft={setDraft} streamingText={streamingText} sending={sending} onSubmit={sendMessage} onBack={() => setChatOpen(false)} actionMenu={actionMenu} setActionMenu={setActionMenu} onSpecial={addSpecialEvent} mode={settings.mode} />
+        ? <ChatView conversation={selectedConversation} character={selectedCharacter} events={visibleEvents} draft={draft} setDraft={setDraft} streamingText={streamingText} sending={sending} onSubmit={sendMessage} onBack={() => setChatOpen(false)} actionMenu={actionMenu} setActionMenu={setActionMenu} onSpecial={addSpecialEvent} onStartCall={startCall} mode={settings.mode} />
         : initialView === "profile"
-          ? <ProfileView character={character} onMessage={() => router.push("/messages")} onCall={() => void addSpecialEvent("call.voice.end")} />
+          ? <ProfileView character={character} onMessage={() => router.push("/messages")} onCall={() => startCall("voice")} />
           : initialView === "memories"
             ? <MemoriesView character={character} />
             : initialView === "zone"
@@ -174,6 +194,7 @@ export function QQShell({ initialView = "messages" }: { initialView?: View }) {
                   ? <ContactsView characters={characters} />
                   : <ChannelsView character={character} />}
     </main>
+    {activeCall && <CallExperience call={activeCall} character={selectedCharacter} onEnd={(duration) => finishCall(activeCall.kind, duration)} />}
     {notice && <div className="toast" role="status"><Icon name="info" size={17} />{notice}<button aria-label="关闭提示" onClick={() => setNotice(undefined)}><Icon name="close" size={15} /></button></div>}
     <MobileNav current={initialView} />
   </div>;
@@ -203,21 +224,61 @@ function SectionPane({ view, character }: { view: View; character: Character }) 
   return <aside className="secondary section-pane"><header className="secondary-header"><p className="eyebrow">QQ Companion</p><h1>{title}</h1></header><div className="section-person"><Avatar character={character} size="lg" /><div><strong>{character.name}</strong><span><i className="online-dot" />在线</span></div></div><nav className="section-menu" aria-label="角色内容导航"><Link className={view === "profile" ? "active" : ""} href="/profile"><Icon name="user" /><span>资料主页</span><Icon name="chevron" size={16} /></Link><Link className={view === "memories" ? "active" : ""} href="/memories"><Icon name="memory" /><span>与 TA 的回忆</span><span className="menu-count">{character.memories.length}</span></Link><Link className={view === "zone" ? "active" : ""} href="/zone"><Icon name="zone" /><span>空间动态</span><Icon name="chevron" size={16} /></Link><Link href="/messages"><Icon name="message" /><span>聊天记录</span><Icon name="chevron" size={16} /></Link></nav>{view === "settings" && <nav className="section-menu settings-menu"><span className="active"><Icon name="radio" /><span>AI 服务</span><Icon name="chevron" size={16} /></span><span><Icon name="shield" /><span>本地数据</span><Icon name="chevron" size={16} /></span></nav>}<div className="section-footnote"><Icon name="shield" size={16} /><span>数据保存在这台设备</span></div></aside>;
 }
 
-function ChatView({ conversation, character, events, draft, setDraft, streamingText, sending, onSubmit, onBack, actionMenu, setActionMenu, onSpecial, mode }: { conversation: Conversation; character: Character; events: AppEvent[]; draft: string; setDraft: (value: string) => void; streamingText: string; sending: boolean; onSubmit: (event: FormEvent) => void; onBack: () => void; actionMenu: boolean; setActionMenu: (value: boolean) => void; onSpecial: (type: "interaction.poke" | "interaction.transfer" | "call.voice.end") => Promise<void>; mode: AppSettings["mode"] }) {
+function ChatView({ conversation, character, events, draft, setDraft, streamingText, sending, onSubmit, onBack, actionMenu, setActionMenu, onSpecial, onStartCall, mode }: { conversation: Conversation; character: Character; events: AppEvent[]; draft: string; setDraft: (value: string) => void; streamingText: string; sending: boolean; onSubmit: (event: FormEvent) => void; onBack: () => void; actionMenu: boolean; setActionMenu: (value: boolean) => void; onSpecial: (type: "interaction.poke" | "interaction.transfer") => Promise<void>; onStartCall: (kind: CallKind) => void; mode: AppSettings["mode"] }) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [events.length, streamingText]);
-  return <div className="chat-view"><header className="main-header"><button className="mobile-back" aria-label="返回会话列表" onClick={onBack}><Icon name="back" /></button><div className="main-title"><Avatar character={character} size="sm" /><div><div className="name-line"><h2>{conversation.name}</h2><span className={`mode-chip ${mode}`}>{mode === "demo" ? "演示对话" : "Live AI"}</span></div><p><i className="online-dot" />在线 · {character.signature}</p></div></div><div className="header-actions"><button className="icon-button" aria-label="添加通话记录" title="添加通话记录" onClick={() => void onSpecial("call.voice.end")}><AssetIcon src="/ui/icons/actions/phone.svg" /></button><button className="icon-button" aria-label="视频通话" title="视频通话"><AssetIcon src="/ui/icons/actions/video.svg" /></button><Link className="icon-button" aria-label="查看角色资料" title="查看角色资料" href="/profile"><Icon name="info" /></Link><button className="icon-button" aria-label="更多"><AssetIcon src="/ui/icons/actions/more.svg" /></button></div></header>
+  return <div className="chat-view"><header className="main-header"><button className="mobile-back" aria-label="返回会话列表" onClick={onBack}><Icon name="back" /></button><div className="main-title"><Avatar character={character} size="sm" /><div><div className="name-line"><h2>{conversation.name}</h2><span className={`mode-chip ${mode}`}>{mode === "demo" ? "演示对话" : "Live AI"}</span></div><p><i className="online-dot" />在线 · {character.signature}</p></div></div><div className="header-actions"><button className="icon-button" aria-label="发起语音通话" title="语音通话" onClick={() => onStartCall("voice")}><AssetIcon src="/ui/icons/actions/phone.svg" /></button><button className="icon-button" aria-label="发起视频通话" title="视频通话" onClick={() => onStartCall("video")}><AssetIcon src="/ui/icons/actions/video.svg" /></button><Link className="icon-button" aria-label="查看角色资料" title="查看角色资料" href="/profile"><Icon name="info" /></Link><button className="icon-button" aria-label="更多"><AssetIcon src="/ui/icons/actions/more.svg" /></button></div></header>
     <section className="timeline" aria-label="消息记录"><div className="timeline-intro"><span>今天</span><p>消息已保存在此设备</p></div>{events.length === 0 && <div className="chat-empty"><Avatar character={character} size="xl" /><h3>开始和 {character.name} 聊天</h3><p>这里的消息会通过统一事件系统保存。</p></div>}{events.map((event, index) => <EventItem key={event.id} event={event} character={character} showMeta={index === 0 || events[index - 1].actorId !== event.actorId || event.type !== "message.text"} />)}{sending && !streamingText && <TypingRow character={character} />}{streamingText && <div className="message-row"><Avatar character={character} size="sm" /><div className="message-stack"><div className="message-meta">{character.name} · 正在输入</div><div className="bubble streaming">{streamingText}<i className="caret" /></div></div></div>}<div ref={endRef} /></section>
-    <form className="composer-wrap" onSubmit={onSubmit}>{actionMenu && <div className="action-popover"><button type="button" onClick={() => void onSpecial("interaction.poke")}><span><AssetIcon src="/ui/icons/actions/poke.svg" /></span><div><strong>拍一拍</strong><small>轻轻提醒 TA</small></div></button><button type="button" onClick={() => void onSpecial("interaction.transfer")}><span><AssetIcon src="/ui/icons/actions/transfer.svg" /></span><div><strong>转账</strong><small>发送演示转账卡片</small></div></button><button type="button" onClick={() => void onSpecial("call.voice.end")}><span><AssetIcon src="/ui/icons/actions/phone.svg" /></span><div><strong>通话记录</strong><small>添加一条语音通话</small></div></button></div>}<div className="composer-toolbar"><button type="button" className={actionMenu ? "active" : ""} aria-label="更多互动" onClick={() => setActionMenu(!actionMenu)}>{actionMenu ? <Icon name="close" /> : <AssetIcon src="/ui/icons/actions/plus.svg" />}</button><button type="button" aria-label="添加附件"><AssetIcon src="/ui/icons/actions/attach.svg" /></button><button type="button" aria-label="发送图片（即将开放）" disabled title="图片上传即将开放"><AssetIcon src="/ui/icons/actions/image.svg" /></button><button type="button" aria-label="表情"><AssetIcon src="/ui/icons/actions/emoji.svg" /></button><span>{draft.length}/1000</span></div><div className="composer"><textarea value={draft} onChange={(event) => setDraft(event.target.value.slice(0, 1000))} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={`给 ${character.name} 发消息…`} aria-label={`给 ${character.name} 发消息`} rows={1} /><button className="send-button" disabled={!draft.trim() || sending} type="submit" aria-label="发送消息"><Icon name="send" size={18} /><span>发送</span></button></div><p className="composer-hint">Enter 发送 · Shift + Enter 换行</p></form></div>;
+    <form className="composer-wrap" onSubmit={onSubmit}>{actionMenu && <div className="action-popover"><button type="button" onClick={() => void onSpecial("interaction.poke")}><span><AssetIcon src="/ui/icons/actions/poke.svg" /></span><div><strong>拍一拍</strong><small>轻轻提醒 TA</small></div></button><button type="button" onClick={() => void onSpecial("interaction.transfer")}><span><AssetIcon src="/ui/icons/actions/transfer.svg" /></span><div><strong>转账</strong><small>发送心意卡片</small></div></button><button type="button" onClick={() => onStartCall("voice")}><span><AssetIcon src="/ui/icons/actions/phone.svg" /></span><div><strong>语音通话</strong><small>进入通话演示</small></div></button><button type="button" onClick={() => onStartCall("video")}><span><AssetIcon src="/ui/icons/actions/video.svg" /></span><div><strong>视频通话</strong><small>打开视频演示</small></div></button></div>}<div className="composer-toolbar"><button type="button" className={actionMenu ? "active" : ""} aria-label="更多互动" onClick={() => setActionMenu(!actionMenu)}>{actionMenu ? <Icon name="close" /> : <AssetIcon src="/ui/icons/actions/plus.svg" />}</button><button type="button" aria-label="添加附件"><AssetIcon src="/ui/icons/actions/attach.svg" /></button><button type="button" aria-label="发送图片（即将开放）" disabled title="图片上传即将开放"><AssetIcon src="/ui/icons/actions/image.svg" /></button><button type="button" aria-label="表情"><AssetIcon src="/ui/icons/actions/emoji.svg" /></button><span>{draft.length}/1000</span></div><div className="composer"><textarea value={draft} onChange={(event) => setDraft(event.target.value.slice(0, 1000))} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={`给 ${character.name} 发消息…`} aria-label={`给 ${character.name} 发消息`} rows={1} /><button className="send-button" disabled={!draft.trim() || sending} type="submit" aria-label="发送消息"><Icon name="send" size={18} /><span>发送</span></button></div><p className="composer-hint">Enter 发送 · Shift + Enter 换行</p></form></div>;
 }
 
 function EventItem({ event, character, showMeta }: { event: AppEvent; character: Character; showMeta: boolean }) {
   const mine = event.source === "user";
-  if (event.type === "interaction.poke") return <div className="system-event"><Icon name="poke" size={15} /><span>{event.payload.content ?? (mine ? `你拍了拍${character.name}` : `${character.name}拍了拍你`)}</span></div>;
-  if (event.type === "call.voice.end") return <div className="system-event call-event"><Icon name="phone" size={15} /><span>语音通话 · {formatDuration(event.payload.durationSeconds ?? 0)}</span></div>;
-  if (event.type === "interaction.transfer") return <div className={`message-row ${mine ? "mine" : ""}`}><Avatar character={mine ? undefined : character} mine={mine} size="sm" /><div className="message-stack transfer-stack">{showMeta && <div className="message-meta">{mine ? "你" : character.name} · {formatTime(event.createdAt)}</div>}<div className="transfer-card"><div className="transfer-icon"><Icon name="wallet" /></div><div><strong>¥ {event.payload.amount.toFixed(2)}</strong><p>{event.payload.note || "转账"}</p></div><span>QQ 钱包</span></div></div></div>;
+  if (event.type === "interaction.poke") return <div className="poke-event-card"><div className="poke-event-art"><CharacterImage src={character.assets?.interactionArt.poke} fallback={character.assets?.avatar.chibi} alt="" sizes="(max-width: 420px) 96vw, 430px" /></div><div><span>轻互动</span><strong>{event.payload.content ?? (mine ? `你拍了拍${character.name}` : `${character.name}拍了拍你`)}</strong><small>别装没看见，我知道你在线。</small></div></div>;
+  if (event.type === "call.voice.end" || event.type === "call.video.end") { const video = event.type === "call.video.end"; return <div className={`system-event call-event ${video ? "video" : "voice"}`}><Icon name={video ? "camera" : "phone"} size={15} /><span>{video ? "视频" : "语音"}通话 · {formatDuration(event.payload.durationSeconds ?? 0)}</span><time>{formatTime(event.createdAt)}</time></div>; }
+  if (event.type === "interaction.transfer") return <div className={`message-row ${mine ? "mine" : ""}`}><Avatar character={mine ? undefined : character} mine={mine} size="sm" /><div className="message-stack transfer-stack">{showMeta && <div className="message-meta">{mine ? "你" : character.name} · {formatTime(event.createdAt)}</div>}<div className="transfer-card"><div className="transfer-copy"><span className="transfer-label"><Icon name="wallet" size={15} />给你的心意</span><strong><small>¥</small>{event.payload.amount.toFixed(2)}</strong><p>{event.payload.note || "转账"}</p><footer><span>待领取</span><b>QQ 钱包</b></footer></div><div className="transfer-art"><CharacterImage src={character.assets?.interactionArt.transfer} fallback={character.assets?.avatar.chibi} alt="" sizes="148px" /></div></div></div></div>;
   if (event.type !== "message.text") return null;
   return <div className={`message-row ${mine ? "mine" : ""}`}><Avatar character={mine ? undefined : character} mine={mine} size="sm" /><div className="message-stack">{showMeta && <div className="message-meta">{mine ? "你" : character.name} · {formatTime(event.createdAt)}</div>}<div className="bubble">{event.payload.content}</div></div></div>;
+}
+
+function CallExperience({ call, character, onEnd }: { call: ActiveCall; character: Character; onEnd: (durationSeconds: number) => Promise<void> }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [seconds, setSeconds] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [speaker, setSpeaker] = useState(true);
+  const [cameraOff, setCameraOff] = useState(false);
+  const [ending, setEnding] = useState(false);
+  const video = call.kind === "video";
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) { dialog.showModal(); dialog.focus(); }
+    const timer = window.setInterval(() => setSeconds(Math.max(0, Math.floor((Date.now() - call.startedAt) / 1000))), 1000);
+    return () => { window.clearInterval(timer); if (dialog?.open) dialog.close(); };
+  }, [call.startedAt]);
+
+  async function endCall() {
+    if (ending) return;
+    setEnding(true);
+    await onEnd(Math.max(1, seconds));
+  }
+
+  return <dialog ref={dialogRef} className={`call-dialog call-dialog--${call.kind}`} aria-labelledby="call-title" tabIndex={-1} onCancel={(event) => { event.preventDefault(); void endCall(); }}>
+    <div className="call-shell">
+      <div className="call-status"><span><i />{video ? "视频通话中" : "语音通话中"}</span><time>{formatDuration(seconds)}</time></div>
+      <div className="call-copy"><span className="call-demo-label">QQ Companion · Demo Call</span><h2 id="call-title">{character.name}</h2><p>{video ? "画面已连接，今天也有好好见面。" : "正在通话 · 听见你的声音了。"}</p></div>
+      <div className={`call-art ${cameraOff ? "camera-off" : ""}`}>
+        {cameraOff ? <div className="camera-off-state"><Avatar character={character} size="hero" /><strong>摄像头已关闭</strong></div> : <CharacterImage src={video ? character.assets?.interactionArt.videoCall : character.assets?.interactionArt.voiceCall} fallback={character.assets?.featureArt.diary} alt={`${character.name}${video ? "视频" : "语音"}通话插画`} sizes="(max-width: 820px) 90vw, 620px" priority />}
+      </div>
+      {video && <div className="self-preview"><Avatar mine size="md" /><span>你</span></div>}
+      <div className="call-controls" aria-label="通话控制">
+        <button type="button" className={muted ? "active" : ""} aria-label={muted ? "打开麦克风" : "静音"} aria-pressed={muted} onClick={() => setMuted(!muted)}><span><Icon name="microphone" /></span><small>{muted ? "已静音" : "静音"}</small></button>
+        {video ? <button type="button" className={cameraOff ? "active" : ""} aria-label={cameraOff ? "打开摄像头" : "关闭摄像头"} aria-pressed={cameraOff} onClick={() => setCameraOff(!cameraOff)}><span><Icon name="camera" /></span><small>{cameraOff ? "开启视频" : "关闭视频"}</small></button> : <button type="button" className={speaker ? "active" : ""} aria-label="切换扬声器" aria-pressed={speaker} onClick={() => setSpeaker(!speaker)}><span><Icon name="volume" /></span><small>扬声器</small></button>}
+        <button type="button" className="hangup" aria-label="挂断通话" disabled={ending} onClick={() => void endCall()}><span><Icon name="phone" /></span><small>{ending ? "结束中" : "挂断"}</small></button>
+        {video && <button type="button" aria-label="切换摄像头"><span><Icon name="camera-switch" /></span><small>翻转</small></button>}
+      </div>
+    </div>
+  </dialog>;
 }
 
 function TypingRow({ character }: { character: Character }) { return <div className="message-row typing-row"><Avatar character={character} size="sm" /><div className="typing-bubble" aria-label={`${character.name} 正在输入`}><i /><i /><i /></div></div>; }
@@ -247,7 +308,28 @@ function SettingsView({ profile, settings, onSave }: { profile: AIProfile; setti
 }
 
 function ContactsView({ characters }: { characters: Character[] }) { return <div className="content-view simple-view"><header className="content-topbar"><div><p className="eyebrow">Contacts</p><h2>联系人</h2></div><button className="primary-button compact"><Icon name="plus" />添加</button></header><div className="simple-content"><div className="contact-grid">{characters.map((character) => <Link href={character.id === "jiang" ? "/profile" : "/messages"} className="contact-card" key={character.id}><Avatar character={character} size="lg" /><strong>{character.name}</strong><span><i className={`online-dot ${character.status}`} />{character.status === "online" ? "在线" : "离开"}</span><p>{character.signature}</p></Link>)}</div></div></div>; }
-function ChannelsView({ character }: { character: Character }) { return <div className="content-view channels-view"><header className="content-topbar"><div><p className="eyebrow">Shared Interests</p><h2>频道</h2></div><button className="primary-button compact"><Icon name="plus" />发布话题</button></header><div className="channels-scroll"><section className="channel-hero"><div><span className="soft-chip">今晚热议</span><h1>一起聊点有意思的。</h1><p>收藏你们共同关注的话题，也留住那些值得继续的讨论。</p><button className="secondary-button">进入深夜观察组 <Icon name="chevron" size={15} /></button></div><div className="channel-art"><CharacterImage src={character.assets?.featureArt.channel} fallback={character.assets?.featureArt.channelFallback} alt="基昂的频道插画" sizes="360px" /></div></section><section className="topic-grid"><article><span>电影</span><h3>如果只能重看一部电影</h3><p>基昂：我会选一部你没看过的，这样还能再陪你看一次。</p><footer><b>18 条回复</b><time>12 分钟前</time></footer></article><article><span>音乐</span><h3>今晚适合戴耳机听的歌</h3><p>深夜观察组 · 本周歌单交换正在进行</p><footer><b>32 条回复</b><time>置顶</time></footer></article><article><span>日常</span><h3>记录一件今天的小事</h3><p>把普通的一天留在这里，之后回看也会很有意思。</p><footer><b>9 条回复</b><time>1 小时前</time></footer></article></section></div></div>; }
+function ChannelsView({ character }: { character: Character }) {
+  return <div className="content-view channels-view"><header className="content-topbar"><div><p className="eyebrow">Shared Interests</p><h2>频道</h2></div><button className="primary-button compact"><Icon name="plus" />发布话题</button></header><div className="channels-scroll"><section className="channel-hero"><div><span className="soft-chip">今晚热议</span><h1>一起聊点有意思的。</h1><p>收藏你们共同关注的话题，也留住那些值得继续的讨论。</p><button className="secondary-button">进入深夜观察组 <Icon name="chevron" size={15} /></button></div><div className="channel-art"><CharacterImage src={character.assets?.featureArt.channel} fallback={character.assets?.featureArt.channelFallback} alt="基昂的频道插画" sizes="360px" /></div></section><section className="topic-grid">
+    <article className="topic-card topic-card--movie">
+      <header className="topic-card-head"><span className="topic-badge"><Icon name="image" size={13} />电影</span><small>MOVIE NIGHT</small></header>
+      <div className="topic-visual movie-visual" aria-hidden="true"><div className="movie-frame"><span><Icon name="image" size={17} /></span><small>陪你重看</small></div><div className="ticket-stub"><span>SEAT</span><strong>02</strong></div></div>
+      <h3>如果只能重看一部电影</h3><p>基昂：我会选一部你没看过的，这样还能再陪你看一次。</p>
+      <footer><b>18 条回复</b><time>12 分钟前</time></footer>
+    </article>
+    <article className="topic-card topic-card--music">
+      <header className="topic-card-head"><span className="topic-badge"><Icon name="radio" size={13} />音乐</span><small>SIDE A · 09/22</small></header>
+      <div className="topic-visual music-visual" aria-hidden="true"><div className="vinyl-record"><i /></div><div className="music-label"><span>DEEP NIGHT ARCHIVE</span><div className="music-wave"><i /><i /><i /><i /><i /><i /><i /></div><strong>本周收藏曲</strong></div></div>
+      <h3>今晚适合戴耳机听的歌</h3><p>深夜观察组 · 本周歌单交换正在进行</p>
+      <footer><b>32 条回复</b><time>置顶</time></footer>
+    </article>
+    <article className="topic-card topic-card--daily">
+      <header className="topic-card-head"><span className="topic-badge"><Icon name="memory" size={13} />日常</span><small>DAILY NOTE</small></header>
+      <div className="topic-visual daily-visual" aria-hidden="true"><div className="memo-sheet"><span>今日记录</span><strong>MON · 09/22</strong><i /></div><span className="journal-star"><Icon name="sparkle" size={20} /></span></div>
+      <h3>记录一件今天的小事</h3><p>把普通的一天留在这里，之后回看也会很有意思。</p>
+      <footer><b>9 条回复</b><time>1 小时前</time></footer>
+    </article>
+  </section></div></div>;
+}
 function MobileNav({ current }: { current: View }) { return <nav className="mobile-nav" aria-label="移动端导航">{navItems.filter((item) => ["messages", "zone", "memories", "profile"].includes(item.id)).map((item) => <Link key={item.id} href={item.href} className={current === item.id ? "active" : ""}>{item.asset ? <AssetIcon src={item.asset} size={21} /> : <Icon name={item.icon} size={21} />}<span>{item.label}</span></Link>)}<Link href="/settings" className={current === "settings" ? "active" : ""}><AssetIcon src="/ui/icons/nav/settings.svg" size={21} /><span>设置</span></Link></nav>; }
 
 function Avatar({ character, mine = false, size = "md", group = false, initials, tone }: { character?: Character; mine?: boolean; size?: "sm" | "md" | "lg" | "xl" | "hero"; group?: boolean; initials?: string; tone?: "coral" | "violet" }) {

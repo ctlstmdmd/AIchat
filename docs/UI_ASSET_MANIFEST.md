@@ -60,7 +60,18 @@ The approved character identity remains the blond, curly-haired chibi used by th
 | `public/characters/char/feature-art/diary.webp` | Valid RIFF/WebP | Memories art and defensive avatar fallback |
 | `public/characters/char/feature-art/zone.webp` | Valid RIFF/WebP | Zone art and defensive Channel fallback |
 
-Both repaired files decode directly and preserve the approved character identity. `CharacterImage` keeps the Diary/Zone fallback paths only for defensive recovery if a future asset request fails; normal rendering no longer uses those fallbacks.
+### Interaction artwork
+
+These approved assets remain centralized under `Character.assets.interactionArt`; chat and call components consume the mapping instead of hardcoding a second character identity.
+
+| Canonical asset | Active behavior |
+| --- | --- |
+| `public/characters/char/interaction-art/poke-transparent.png` | Transparent poke sticker in the message-timeline banner |
+| `public/characters/char/interaction-art/transfer-transparent.png` | Transparent character sticker inside the enriched transfer card |
+| `public/characters/char/interaction-art/voice-call-transparent.png` | Transparent primary artwork for the voice-call demo dialog |
+| `public/characters/char/interaction-art/video-call-transparent.png` | Transparent primary artwork for the video-call demo dialog |
+
+All four active interaction files retain the approved source pixels and include genuine alpha transparency. The older sibling WebPs are flattened black-background source files and are intentionally no longer referenced. `CharacterImage` keeps approved avatar/feature-art paths only as defensive recovery if a future asset request fails; normal rendering uses the dedicated transparent interaction artwork.
 
 ## CSS-only components
 

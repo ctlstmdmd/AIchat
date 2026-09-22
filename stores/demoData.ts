@@ -29,6 +29,12 @@ export type CharacterAssets = {
     diary: string;
     zone: string;
   };
+  interactionArt: {
+    poke: string;
+    transfer: string;
+    voiceCall: string;
+    videoCall: string;
+  };
 };
 
 export type Character = {
@@ -93,6 +99,12 @@ export const demoCharacters: Character[] = [
         channelFallback: "/characters/char/feature-art/zone.webp",
         diary: "/characters/char/feature-art/diary.webp",
         zone: "/characters/char/feature-art/zone.webp",
+      },
+      interactionArt: {
+        poke: "/characters/char/interaction-art/poke-transparent.png",
+        transfer: "/characters/char/interaction-art/transfer-transparent.png",
+        voiceCall: "/characters/char/interaction-art/voice-call-transparent.png",
+        videoCall: "/characters/char/interaction-art/video-call-transparent.png",
       },
     },
     status: "online",

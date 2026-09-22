@@ -13,7 +13,8 @@ The application presents one persistent character across chat, profile, memories
 - QQ-style three-column desktop shell and responsive mobile navigation
 - Character chat with Demo and Live AI modes
 - OpenAI-compatible connection test and streaming chat gateway
-- Event-driven text, poke, transfer, and call-record interactions
+- Event-driven text, illustrated poke and transfer interactions, and persisted call records
+- Screenshot-ready voice and video call demo experiences with local controls and timers
 - Character Profile, Memories, QQ Zone, Contacts, and Channels views
 - Local-first conversations, events, characters, and settings in IndexedDB
 - Legacy SillyTavern-style response compatibility
@@ -56,7 +57,7 @@ OpenAI-compatible provider adapter
 
 ## Demo Mode
 
-Demo Mode requires no API key. It seeds a character, conversation history, memories, Zone posts, and examples of poke, transfer, and call-record events so the complete portfolio flow is available immediately.
+Demo Mode requires no API key. It seeds a character, conversation history, memories, Zone posts, and examples of poke, transfer, and call-record events so the complete portfolio flow is available immediately. From Messages, the phone and video actions open polished local-only call demos; hanging up writes the matching voice or video record through the same event system and IndexedDB persistence layer.
 
 ## Live AI Mode
 
@@ -82,6 +83,8 @@ Screenshots are intentionally not fabricated or committed yet. The planned repos
 | --- | --- |
 | Character conversation | `messages-chat.png` |
 | Interaction event menu | `chat-actions.png` |
+| Voice call demo | `voice-call.png` |
+| Video call demo | `video-call.png` |
 | QQ Zone | `zone.png` |
 | Character Profile | `profile.png` |
 | Memories | `memories.png` |
@@ -93,7 +96,7 @@ Screenshots are intentionally not fabricated or committed yet. The planned repos
 Current limitations:
 
 - Some Zone, album, channel, and social write controls are presentation-only prototypes.
-- Full voice and video calling are not implemented; the current product records demonstration call events.
+- Voice and video are intentionally high-fidelity local demo experiences; realtime media and WebRTC are outside the Portfolio MVP scope.
 - Diary content appears within the memory experience but does not yet have a standalone full page.
 - Live AI Mode requires a valid compatible provider and credentials.
 

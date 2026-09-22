@@ -92,10 +92,20 @@ export async function loadWorkspace() {
   return {
     events: events.map(validateEvent).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     conversations: conversations.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
-    characters: characters.map((character) => ({
-      ...character,
-      assets: character.assets ?? demoCharacters.find((item) => item.id === character.id)?.assets,
-    })),
+    characters: characters.map((character) => {
+      const defaults = demoCharacters.find((item) => item.id === character.id)?.assets;
+      if (!defaults) return character;
+      return {
+        ...character,
+        assets: {
+          ...defaults,
+          ...character.assets,
+          avatar: { ...defaults.avatar, ...character.assets?.avatar },
+          featureArt: { ...defaults.featureArt, ...character.assets?.featureArt },
+          interactionArt: { ...character.assets?.interactionArt, ...defaults.interactionArt },
+        },
+      };
+    }),
     settings: settings ?? defaultSettings,
     profile: profile ?? defaultProfile,
     zonePosts: zonePosts ?? demoZonePosts,
