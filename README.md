@@ -37,37 +37,32 @@ The repository is currently a **Portfolio MVP / v0.1**, optimized for product de
 
 ## Showcase
 
-### Chat & High-frequency Interaction
-
-<p align="center">
-  <img src="docs/screenshots/chat.webp" alt="QQ Companion chat interface with transfer and poke interactions" width="100%" />
-</p>
-
-The primary conversation experience combines text chat with structured social interactions such as poke, transfer, and call records, keeping richer actions inside the same event and persistence model.
-
-### Relationship Memory
-
-<p align="center">
-  <img src="docs/screenshots/memories.webp" alt="QQ Companion relationship memory timeline" width="100%" />
-</p>
-
-Conversation history is reorganized into revisitable memories and milestones so the relationship can accumulate visible history instead of remaining a flat message log.
-
-### Social Presence & Shared Interests
-
-<p align="center">
-  <img src="docs/screenshots/ecosystem.webp" alt="QQ Companion QQ Zone and shared-interest Channels" width="100%" />
-</p>
-
-QQ Zone and Channels extend the character beyond the chat window through social presence and shared-interest content, creating lower-friction reasons to return.
-
-### Model Settings
-
-<p align="center">
-  <img src="docs/screenshots/settings.webp" alt="QQ Companion OpenAI-compatible model settings" width="100%" />
-</p>
-
-Live AI Mode supports configurable OpenAI-compatible endpoints, model parameters, streaming, and connection testing while Demo Mode remains immediately explorable without credentials.
+<table>
+<tr>
+<td width="50%" valign="top">
+<p align="center"><img src="public/characters/char/interaction-art/transfer-transparent.png" width="180" alt="Transfer interaction artwork" /></p>
+<h3 align="center">Chat & Social Interaction</h3>
+<p>Text chat, poke, transfer, and voice/video call records share the same event and persistence model.</p>
+</td>
+<td width="50%" valign="top">
+<p align="center"><img src="public/characters/char/feature-art/diary.webp" width="180" alt="Memory feature artwork" /></p>
+<h3 align="center">Relationship Memory</h3>
+<p>Conversation history is reorganized into revisitable memories, milestones, and shared events.</p>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<p align="center"><img src="public/characters/char/feature-art/zone.webp" width="180" alt="QQ Zone feature artwork" /></p>
+<h3 align="center">Social Presence</h3>
+<p>QQ Zone extends the character beyond the chat window with posts, photos, comments, and visible life traces.</p>
+</td>
+<td width="50%" valign="top">
+<p align="center"><img src="public/characters/char/feature-art/channel.webp" width="180" alt="Channel feature artwork" /></p>
+<h3 align="center">Shared Interests</h3>
+<p>Channels use movies, music, and daily-life topics to create lower-friction reasons to re-engage.</p>
+</td>
+</tr>
+</table>
 
 ## Product Thinking
 
