@@ -1,117 +1,219 @@
+<div align="center">
+
 # QQ Companion
 
-QQ Companion is a QQ-inspired AI companion and social interaction prototype built as a standalone web application. It evolves a legacy SillyTavern regex-based character interaction system into a typed, event-driven product with local persistence and an optional OpenAI-compatible runtime.
+### AI Companion · Relationship-oriented Social Prototype
 
-The repository is currently a Portfolio MVP / v0.1 focused on a polished, immediately explorable demo.
+A QQ-inspired, local-first AI companion MVP that turns one-off chat into a persistent relationship experience through **high-frequency interactions, shared memories, social presence, and interest-based content**.
+
+基于 QQ 社交语境设计的 AI Companion 高保真 MVP：从“能聊天”进一步探索“愿意持续互动、形成共同经历、在聊天框之外保持角色存在感”。
+
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-18-149ECA?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3.23-3E67B1)
+![Status](https://img.shields.io/badge/status-Portfolio%20MVP-F6C344)
+
+**Demo-first · Local-first · Event-driven · OpenAI-compatible**
+
+</div>
+
+---
 
 ## Overview
 
-The application presents one persistent character across chat, profile, memories, QQ Zone, contacts, and shared-interest channels. Demo Mode ships with a complete local scenario, while Live AI Mode lets a user connect an OpenAI-compatible endpoint without changing the UI or event model.
+QQ Companion is a standalone web application built around one persistent AI character.
 
-## Key Features
+Instead of treating AI chat as a sequence of isolated messages, the product organizes interaction into a lightweight social relationship system:
 
-- QQ-style three-column desktop shell and responsive mobile navigation
-- Character chat with Demo and Live AI modes
-- OpenAI-compatible connection test and streaming chat gateway
-- Event-driven text, illustrated poke and transfer interactions, and persisted call records
-- Screenshot-ready voice and video call demo experiences with local controls and timers
-- Character Profile, Memories, QQ Zone, Contacts, and Channels views
-- Local-first conversations, events, characters, and settings in IndexedDB
-- Legacy SillyTavern-style response compatibility
-- Centralized character asset configuration with defensive visual fallbacks
+- **Messages** for text conversation and high-frequency interaction
+- **Poke / Transfer / Voice / Video** for richer social feedback
+- **Memories** for turning history into revisitable relationship assets
+- **QQ Zone** for character social presence beyond the chat window
+- **Channels** for shared-interest content and lower-friction re-engagement
+- **Profile / Contacts / Settings** for a complete product-level experience
 
-## Architecture
+The repository is currently a **Portfolio MVP / v0.1**, optimized for product demonstration, interaction completeness, and visual consistency rather than production-scale backend infrastructure.
 
-User interactions are normalized before they are persisted or interpreted:
+## Product Thinking
 
-```text
-React UI
-  ↓
-AppEvent (Zod validation)
-  ↓
-BrowserEventStore
-  ↓
-IndexedDB
-```
+The core design goal is not to add features for their own sake, but to increase **relationship feedback density**.
 
-Live AI requests stay behind the application boundary:
+| User problem | Product response | Intended value |
+| --- | --- | --- |
+| Pure text chat feels repetitive | Poke, transfer, voice/video call interactions | More varied, socially recognizable feedback |
+| Chat history is difficult to revisit meaningfully | Memories, milestones, shared-event timeline | Turn history into “relationship assets” |
+| The character disappears outside the conversation | QQ Zone, profile states, shared-interest channels | Build persistent social presence |
+| Re-starting a conversation requires effort | Content cards and shared-interest entry points | Lower the cost of re-engagement |
+
+**Product loop**
 
 ```text
-Browser
-  ↓
-Next.js API routes
-  ↓
-OpenAI-compatible provider adapter
+High-frequency interaction
+        ↓
+Event persistence
+        ↓
+Revisitable relationship assets
+        ↓
+Content extension
+        ↓
+Re-engagement
 ```
 
-`LegacyParser` converts supported legacy outputs into structured events. `ResponseInterpreter` separates structured model responses from legacy text, and `Character.assets` keeps avatar and feature-art paths out of individual page components.
+## Experience Highlights
 
-## Technical Highlights
+### 1. Interaction Showcase
 
-- Next.js 14 and React 18
-- TypeScript and Zod runtime validation
-- Native IndexedDB persistence
-- Streaming API responses with readable streams
-- Event-driven interaction architecture
-- Responsive, token-driven CSS without a component framework dependency
+Chat supports structured interaction events rather than only plain text:
 
-## Demo Mode
+- Text messages
+- Poke interactions
+- Transfer cards
+- Voice-call records
+- Video-call records
+- Screenshot-ready local voice/video call demos
 
-Demo Mode requires no API key. It seeds a character, conversation history, memories, Zone posts, and examples of poke, transfer, and call-record events so the complete portfolio flow is available immediately. From Messages, the phone and video actions open polished local-only call demos; hanging up writes the matching voice or video record through the same event system and IndexedDB persistence layer.
+All special interactions flow through the same validated event model and persistence layer.
 
-## Live AI Mode
+### 2. Relationship & Retention
 
-Settings accepts an OpenAI-compatible Base URL, API key, model, temperature, context window, output limit, and streaming preference. Connection tests use `/api/ai/test`; chat requests use `/api/ai/chat` and are forwarded by the server route to the configured provider.
+Conversation history is reorganized into memories, shared events, and milestones.
+
+The goal is to make retention come not only from notifications, but also from the user's accumulated interaction history with the character.
+
+### 3. Content Ecosystem
+
+The character exists beyond the message thread through:
+
+- QQ Zone-style social posts
+- Shared-interest Channels
+- Character Profile
+- Contacts and online states
+- Memory / diary-style content
+
+This creates multiple natural entry points back into the relationship.
+
+### 4. Demo Mode + Live AI Mode
+
+**Demo Mode** requires no API key and seeds a complete local scenario for immediate exploration.
+
+**Live AI Mode** supports an OpenAI-compatible endpoint with configurable:
+
+- Base URL
+- API key
+- Model
+- Temperature
+- Context window
+- Output limit
+- Streaming preference
 
 No API key is included in the repository.
 
-## Privacy and Local Data
+---
 
-Conversations, events, characters, and settings are stored in the current browser's IndexedDB. Clearing site data removes that local state.
+## Architecture
 
-When Live AI Mode is used, the selected conversation context and configured credentials are sent through this application's API route to the chosen compatible provider. The project does not claim that provider traffic remains local.
+The application keeps product interaction state separate from model-provider logic.
 
-## Legacy Compatibility
+### Event flow
 
-The original interaction system relied on SillyTavern regex transforms. `LegacyParser` preserves that history by recognizing supported legacy formats and converting them into validated `AppEvent` records, allowing old character interactions to enter the same store used by the modern UI.
+```text
+React UI
+   ↓
+AppEvent
+(Zod runtime validation)
+   ↓
+BrowserEventStore
+   ↓
+IndexedDB
+```
 
-## Portfolio Screenshots
+### AI request flow
 
-Screenshots are intentionally not fabricated or committed yet. The planned repository location is `docs/screenshots/` with these final captures:
+```text
+Browser
+   ↓
+Next.js API routes
+   ↓
+OpenAI-compatible provider adapter
+```
 
-| Screen | Planned filename |
+### Compatibility layer
+
+`LegacyParser` converts supported legacy SillyTavern-style outputs into structured `AppEvent` records.
+
+`ResponseInterpreter` separates structured model responses from legacy text so both paths can enter the same application event system.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
 | --- | --- |
-| Character conversation | `messages-chat.png` |
-| Interaction event menu | `chat-actions.png` |
-| Voice call demo | `voice-call.png` |
-| Video call demo | `video-call.png` |
-| QQ Zone | `zone.png` |
-| Character Profile | `profile.png` |
-| Memories | `memories.png` |
+| Framework | Next.js 14 |
+| UI | React 18 |
+| Language | TypeScript 5.6 |
+| Runtime validation | Zod |
+| Persistence | Native IndexedDB |
+| AI integration | OpenAI-compatible API routes |
+| Streaming | Readable streams |
+| Styling | Responsive token-driven CSS |
+| State model | Event-driven application architecture |
 
-## Current Status
+No UI component framework or external client-state library is required for the current MVP.
 
-**Portfolio MVP / v0.1**
+---
 
-Current limitations:
+## Project Structure
 
-- Some Zone, album, channel, and social write controls are presentation-only prototypes.
-- Voice and video are intentionally high-fidelity local demo experiences; realtime media and WebRTC are outside the Portfolio MVP scope.
-- Diary content appears within the memory experience but does not yet have a standalone full page.
-- Live AI Mode requires a valid compatible provider and credentials.
+```text
+AIchat/
+├─ app/                     # Next.js routes and API routes
+├─ components/qq/           # Product UI and interaction components
+├─ core/                    # Events, parsing, interpretation, persistence contracts
+├─ stores/                  # Demo data and character configuration
+├─ public/
+│  ├─ characters/           # Character and interaction artwork
+│  └─ ui/                   # Navigation/action icons and decorations
+├─ docs/                    # Architecture, design, API and asset documentation
+├─ legacy/                  # Preserved legacy regex source
+└─ scripts/                 # Validation helpers
+```
 
-The approved default avatar and dedicated Channel artwork were repaired in commit `91a8670` and now render directly. Diary and Zone remain configured only as defensive fallbacks.
+---
 
-## Local Development
+## Quick Start
+
+### Requirements
+
+- Node.js 20+
+- npm
+
+### Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001).
+Open:
+
+```text
+http://localhost:3001
+```
+
+### Production build
+
+```bash
+npm run build
+npm run start
+```
+
+---
 
 ## Validation
+
+The repository includes the following validation commands:
 
 ```bash
 npm run typecheck
@@ -120,7 +222,47 @@ npm run test
 npm run build
 ```
 
-## Future Roadmap
+Current validation covers TypeScript checks, linting, legacy-parser compatibility, production build output, responsive layout checks, interaction persistence, and core route availability.
+
+---
+
+## Local Data & Privacy
+
+Conversations, events, characters, and settings are stored in the browser's **IndexedDB**.
+
+Clearing site data removes that local state.
+
+When Live AI Mode is enabled, the selected conversation context and configured credentials are sent through this application's API route to the compatible provider selected by the user. The project does not claim that external provider traffic remains local.
+
+---
+
+## Current Scope
+
+**Portfolio MVP / v0.1**
+
+Implemented:
+
+- Responsive QQ-inspired desktop/mobile shell
+- Demo and Live AI chat modes
+- Event-driven text, poke, transfer, voice, and video interactions
+- Local-first IndexedDB persistence
+- Character Profile, Memories, QQ Zone, Contacts, Channels, and Settings
+- OpenAI-compatible connection testing and streaming chat
+- Legacy response compatibility
+- Centralized character asset management and fallback handling
+
+Intentionally outside the current MVP scope:
+
+- Realtime WebRTC voice/video
+- Production authentication
+- Cloud account sync
+- Multi-user backend
+- Live2D / realtime avatar rendering
+- Large-scale recommendation or feed infrastructure
+
+---
+
+## Roadmap
 
 - Standalone Diary experience
 - Richer call runtime
@@ -128,3 +270,12 @@ npm run build
 - Memory summarization
 - Character package import/export
 - Additional AI provider adapters
+
+---
+
+## Design Principle
+
+> Build fewer isolated features. Create more meaningful relationship feedback.
+
+The project treats AI companionship as a product-system problem: interaction, persistence, memory, social presence, and content should reinforce each other instead of living as disconnected screens.
+
