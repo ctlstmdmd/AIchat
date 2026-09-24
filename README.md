@@ -35,6 +35,40 @@ Instead of treating AI chat as a sequence of isolated messages, the product orga
 
 The repository is currently a **Portfolio MVP / v0.1**, optimized for product demonstration, interaction completeness, and visual consistency rather than production-scale backend infrastructure.
 
+## Showcase
+
+### Chat & High-frequency Interaction
+
+<p align="center">
+  <img src="docs/screenshots/chat.webp" alt="QQ Companion chat interface with transfer and poke interactions" width="100%" />
+</p>
+
+The primary conversation experience combines text chat with structured social interactions such as poke, transfer, and call records, keeping richer actions inside the same event and persistence model.
+
+### Relationship Memory
+
+<p align="center">
+  <img src="docs/screenshots/memories.webp" alt="QQ Companion relationship memory timeline" width="100%" />
+</p>
+
+Conversation history is reorganized into revisitable memories and milestones so the relationship can accumulate visible history instead of remaining a flat message log.
+
+### Social Presence & Shared Interests
+
+<p align="center">
+  <img src="docs/screenshots/ecosystem.webp" alt="QQ Companion QQ Zone and shared-interest Channels" width="100%" />
+</p>
+
+QQ Zone and Channels extend the character beyond the chat window through social presence and shared-interest content, creating lower-friction reasons to return.
+
+### Model Settings
+
+<p align="center">
+  <img src="docs/screenshots/settings.webp" alt="QQ Companion OpenAI-compatible model settings" width="100%" />
+</p>
+
+Live AI Mode supports configurable OpenAI-compatible endpoints, model parameters, streaming, and connection testing while Demo Mode remains immediately explorable without credentials.
+
 ## Product Thinking
 
 The core design goal is not to add features for their own sake, but to increase **relationship feedback density**.
@@ -175,7 +209,7 @@ AIchat/
 ├─ public/
 │  ├─ characters/           # Character and interaction artwork
 │  └─ ui/                   # Navigation/action icons and decorations
-├─ docs/                    # Architecture, design, API and asset documentation
+├─ docs/                    # Product docs, screenshots and internal history
 ├─ legacy/                  # Preserved legacy regex source
 └─ scripts/                 # Validation helpers
 ```
