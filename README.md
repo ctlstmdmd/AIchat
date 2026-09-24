@@ -40,24 +40,24 @@ The repository is currently a **Portfolio MVP / v0.1**, optimized for product de
 <table>
 <tr>
 <td width="50%" valign="top">
-<p align="center"><img src="public/characters/char/interaction-art/transfer-transparent.png" width="180" alt="Transfer interaction artwork" /></p>
+<p align="center"><img src="docs/showcase/chat-social.webp" width="95%" alt="QQ Companion chat and social interaction interface" /></p>
 <h3 align="center">Chat & Social Interaction</h3>
 <p>Text chat, poke, transfer, and voice/video call records share the same event and persistence model.</p>
 </td>
 <td width="50%" valign="top">
-<p align="center"><img src="public/characters/char/feature-art/diary.webp" width="180" alt="Memory feature artwork" /></p>
+<p align="center"><img src="docs/showcase/relationship-memory.webp" width="95%" alt="QQ Companion relationship memory timeline" /></p>
 <h3 align="center">Relationship Memory</h3>
 <p>Conversation history is reorganized into revisitable memories, milestones, and shared events.</p>
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
-<p align="center"><img src="public/characters/char/feature-art/zone.webp" width="180" alt="QQ Zone feature artwork" /></p>
+<p align="center"><img src="docs/showcase/social-presence.webp" width="95%" alt="QQ Companion social presence and QQ Zone interface" /></p>
 <h3 align="center">Social Presence</h3>
 <p>QQ Zone extends the character beyond the chat window with posts, photos, comments, and visible life traces.</p>
 </td>
 <td width="50%" valign="top">
-<p align="center"><img src="public/characters/char/feature-art/channel.webp" width="180" alt="Channel feature artwork" /></p>
+<p align="center"><img src="docs/showcase/shared-interests.webp" width="95%" alt="QQ Companion shared-interest Channels interface" /></p>
 <h3 align="center">Shared Interests</h3>
 <p>Channels use movies, music, and daily-life topics to create lower-friction reasons to re-engage.</p>
 </td>
@@ -204,7 +204,7 @@ AIchat/
 ├─ public/
 │  ├─ characters/           # Character and interaction artwork
 │  └─ ui/                   # Navigation/action icons and decorations
-├─ docs/                    # Product docs, screenshots and internal history
+├─ docs/                    # Product docs, showcase assets and internal history
 ├─ legacy/                  # Preserved legacy regex source
 └─ scripts/                 # Validation helpers
 ```
